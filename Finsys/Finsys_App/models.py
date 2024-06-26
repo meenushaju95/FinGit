@@ -1,5 +1,11 @@
 from django.db import models
 from django.utils import timezone
+import datetime
+from django.db import models
+
+
+from django.utils import timezone
+
 
 # Create your models here.
 
@@ -374,3 +380,158 @@ class Fin_CNotification(models.Model):
     date_created = models.DateField(auto_now_add=True,null=True)
     time=models.TimeField(auto_now_add=True,null=True)
     status = models.CharField(max_length=100,null=True,default='New')   
+
+
+#Bank Holders
+
+class Fin_BankHolder(models.Model):
+    LoginDetails = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE, null=True, blank=True)
+    Company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE, null=True, blank=True)
+
+    Holder_name = models.CharField(max_length=255, null=True, blank=True)
+    Alias = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=10, null=True, blank=True)
+    Email = models.EmailField(max_length=255, null=True, blank=True)
+    ACCOUNT_TYPE_CHOICES = [('CC', 'Credit Card'), ('BA', 'Bank Account'),]
+    Account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='BA',)
+
+    Set_cheque_book_range = models.BooleanField(default=False)
+    Enable_cheque_printing = models.BooleanField(default=False)
+    Set_cheque_printing_configuration = models.BooleanField(default=False)
+
+    Mailing_name = models.CharField(max_length=100)
+    Address = models.TextField(max_length=255, null=True, blank=True)
+    Country = models.CharField(max_length=100,null=True,blank=True)
+    STATE_CHOICES = [
+    ('AN', 'Andaman and Nicobar Islands'),
+    ('AP', 'Andhra Pradesh'),
+    ('AR', 'Arunachal Pradesh'),
+    ('AS', 'Assam'),
+    ('BR', 'Bihar'),
+    ('CH', 'Chhattisgarh'),
+    ('DL', 'National Capital Territory of Delhi'),
+    ('GA', 'Goa'),
+    ('GJ', 'Gujarat'),
+    ('HR', 'Haryana'),
+    ('HP', 'Himachal Pradesh'),
+    ('JK', 'Jammu and Kashmir'),
+    ('LA', 'Ladakh'),
+    ('JH', 'Jharkhand'),
+    ('KA', 'Karnataka'),
+    ('KL', 'Kerala'),
+    ('MP', 'Madhya Pradesh'),
+    ('MH', 'Maharashtra'),
+    ('MN', 'Manipur'),
+    ('ML', 'Meghalaya'),
+    ('MZ', 'Mizoram'),
+    ('NL', 'Nagaland'),
+    ('OR', 'Odisha'),
+    ('PB', 'Punjab'),
+    ('RJ', 'Rajasthan'),
+    ('SK', 'Sikkim'),
+    ('TN', 'Tamil Nadu'),
+    ('TG', 'Telangana'),
+    ('TR', 'Tripura'),
+    ('UT', 'Uttarakhand'),
+    ('UP', 'Uttar Pradesh'),
+    ('WB', 'West Bengal')
+    ]
+    State = models.CharField(max_length=100, choices=STATE_CHOICES,)
+    Pin = models.CharField(max_length=6)
+
+    REGISTRATION_TYPE_CHOICES = [('regular', 'Regular'), ('composition', 'Composition'), ('consumer', 'Consumer'),
+                                 ('unregistered', 'Unregistered'),]
+    Pan_it_number = models.CharField(max_length=10, blank=True)
+    Registration_type = models.CharField(max_length=20, choices=REGISTRATION_TYPE_CHOICES, default='unknown')
+    Gstin_un = models.CharField(max_length=15, blank=True)
+    Set_alter_gst_details = models.BooleanField(default=False)
+
+    Date = models.DateField(default=datetime.date.today)
+    ArithmeticErrormount = models.DecimalField(max_digits=10, decimal_places=2)
+    Types = [('CREDIT', 'CREDIT'), ('DEBIT', 'DEBIT'),]
+    Open_type = models.CharField(max_length=20, choices=Types, default='unknown')
+
+    Swift_code = models.CharField(max_length=11,null=True, blank=True)
+    Bank_name = models.CharField(max_length=20, null=True, blank=True)
+    Ifsc_code = models.CharField(max_length=15, null=True, blank=True)
+    Branch_name = models.CharField(max_length=20, null=True, blank=True)
+    Account_number = models.CharField(max_length=20, null=True, blank=True)
+
+    
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.Holder_name
+    
+    
+
+class Fin_BankHolderComment(models.Model):
+    LoginDetails = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    Company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+
+    Holder = models.ForeignKey(Fin_BankHolder, on_delete=models.CASCADE)
+    comment_text = models.TextField(max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Comment #{self.id}'
+       
+
+class Fin_BankHolderHistory(models.Model):
+    LoginDetails = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    Company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    Holder = models.ForeignKey(Fin_BankHolder, on_delete=models.CASCADE)
+
+
+    date = models.DateField(auto_now_add=True, auto_now=False, null=True)
+    action_choices = [
+        ('Created', 'Created'),
+        ('Edited', 'Edited')
+        ]
+    action = models.CharField(max_length=20, null=True, blank = True, choices=action_choices)
+
+# Banking
+class Fin_Banking(models.Model):
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+
+    bank_name = models.CharField(max_length=255,null=True,blank=True) 
+    account_number = models.CharField(max_length=255,null=True,blank=True) 
+    ifsc_code = models.CharField(max_length=255,null=True,blank=True) 
+    branch_name = models.CharField(max_length=255,null=True,blank=True) 
+    opening_balance_type = models.CharField(max_length=255,null=True,blank=True) 
+    opening_balance = models.IntegerField(null=True,default=0)
+    date = models.DateTimeField(auto_now_add=False,null=True)
+    current_balance = models.IntegerField(null=True,default=0)
+    bank_status = models.CharField(max_length=255,null=True,blank=True) 
+   
+class Fin_BankingHistory(models.Model):
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True,null=True)
+    action = models.CharField(max_length=255,null=True,blank=True)
+class Fin_BankTransactions(models.Model): 
+
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
+
+    from_type = models.CharField(max_length=255,null=True,blank=True) 
+    to_type = models.CharField(max_length=255,null=True,blank=True) 
+    amount = models.IntegerField(null=True,default=0)
+    adjustment_date = models.DateTimeField(auto_now_add=False,null=True)
+    description = models.CharField(max_length=255,null=True,blank=True) 
+    transaction_type = models.CharField(max_length=255,null=True,blank=True) 
+    adjustment_type = models.CharField(max_length=255,null=True,blank=True) 
+    current_balance = models.IntegerField(null=True,default=0)
+    bank_to_bank = models.IntegerField(null=True,default=0)
+class Fin_BankTransactionHistory(models.Model): 
+
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    bank_transaction = models.ForeignKey(Fin_BankTransactions, on_delete=models.CASCADE,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True,null=True)
+    action = models.CharField(max_length=255,null=True,blank=True)
+
+

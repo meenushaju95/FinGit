@@ -22,6 +22,8 @@ from xhtml2pdf import pisa
 from django.core.mail import send_mail, EmailMessage
 from io import BytesIO
 from django.conf import settings
+from datetime import datetime
+
 
 # Create your views here.
 
@@ -4658,6 +4660,126 @@ def Fin_checkCustomerName(request):
             return Response({'is_exist':True, 'message':msg})
         else:
             return Response({'is_exist':False})
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+
+#add bank 
+
+
+@api_view(("POST",))
+def holder_createNewBank(request):
+    try:
+        s_id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=s_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=s_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=s_id).company_id
+
+        request.data["company"] = com.id
+        request.data["login_details"] = com.Login_Id.id
+        request.data["opening_balance"] = -1 * float(request.data['opening_balance']) if request.data['opening_balance_type'] == 'CREDIT' else float(request.data['opening_balance'])
+        date_str = request.data['date']
+
+        # Appending the default time '00:00:00' to the date string
+        datetime_str = f"{date_str} 00:00:00"
+
+        # Converting the combined string to a datetime object
+        dt = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        request.data['date'] = dt
+
+        if Fin_Banking.objects.filter(company = com, bank_name__iexact = request.data['bank_name'], account_number__iexact = request.data['account_number']).exists():
+            return Response({"status": False, "message": "Account Number already exists"})
+        else:
+            serializer = BankSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                bank = Fin_Banking.objects.get(id=serializer.data['id'])
+                
+                # save transactions
+                banking_history = Fin_BankingHistory(
+                    login_details = data,
+                    company = com,
+                    banking = bank,
+                    action = 'Created'
+                )
+                banking_history.save()
+                
+                transaction=Fin_BankTransactions(
+                    login_details = data,
+                    company = com,
+                    banking = bank,
+                    amount = request.data['opening_balance'],
+                    adjustment_date = request.data['date'],
+                    transaction_type = "Opening Balance",
+                    from_type = '',
+                    to_type = '',
+                    current_balance = request.data['opening_balance']
+                    
+                )
+                transaction.save()
+
+                transaction_history = Fin_BankTransactionHistory(
+                    login_details = data,
+                    company = com,
+                    bank_transaction = transaction,
+                    action = 'Created'
+                )
+                transaction_history.save()
+                return Response(
+                    {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {"status": False, "data": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+@api_view(("GET",))
+def get_banks(request,id):
+    try:
+        data = Fin_Login_Details.objects.get(id=id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=id).company_id
+
+        bank = Fin_Banking.objects.filter(company=com)
+        serializer = BankSerializer(bank, many=True)
+        return Response(
+            {"status": True, "bank": serializer.data}, status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+@api_view(("GET",))
+def get_account_numbers(request,bid,id):
+    try:
+        data = Fin_Login_Details.objects.get(id=id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=id).company_id
+
+        bank = Fin_Banking.objects.filter(company=com,id=bid)
+        serializer = BankSerializer(bank, many=True)
+        return Response(
+            {"status": True, "bank": serializer.data}, status=status.HTTP_200_OK
+        )
     except Exception as e:
         print(e)
         return Response(

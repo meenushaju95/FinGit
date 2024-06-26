@@ -92,4 +92,10 @@ urlpatterns = [
     path('check_email/',Fin_checkEmail),
     path('check_customer_name/',Fin_checkCustomerName),
 
+    #add bank
+    path('holder_create_new_bank/',holder_createNewBank),
+
+    path('get_banks/<int:id>/',get_banks),
+    path('get_account_numbers/<int:bid>/<int:id>/',get_account_numbers)
+
 ]

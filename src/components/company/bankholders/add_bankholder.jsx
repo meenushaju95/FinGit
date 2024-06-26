@@ -1,10 +1,227 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import FinBase from "../FinBase";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import axios from "axios";
+import config from "../../../functions/config";
+import Swal from "sweetalert2";
+
+
+
 
 
 function Addbankholder() {
+  const ID = Cookies.get("Login_id");
+  const navigate = useNavigate();
   const [bankDetails , setBankDetails] = useState('')
+  const [holder,setHolder] = useState('')
+  const [alias,setAlias] = useState('')
+  const [phone,setPhone] = useState('')
+  const [mail,setMail] = useState('')
+  const [accounttypye,setAccounttype] = useState('')
+  const [bank,setBank] = useState('')
+  const [accountno,setAccountno] = useState('')
+  const [ifsc,setIfsc] = useState('')
+  const [swift,setSwift] = useState('')
+  const [branch,setBranch] = useState('')
+  const [checkbookrange,setCheckbookrange] = useState('')
+  const [checkprint,setCheckprint] = useState('')
+  const [checkprintconfig,setCheckprintconfig] = useState('')
+  const [mailname,setMailname] = useState('')
+  const [address,setaddress] = useState('')
+  const [country,setCountry] = useState('')
+  const [state,setState] = useState('')
+  const [pin,setPin] = useState('')
+  const [pan,setPan] = useState('')
+  const [regtype,setRegtype] = useState('')
+  const [gstno,setGstno] = useState('')
+  const [altergst,setAltergst] = useState('')
+  const [date,setDate] = useState('')
+  const [amount,setAmount] = useState('')
+  const [type,setType] = useState('')
+  
+
+
+
+  const [modalbank,setBankmodal] = useState('')
+  const [modalaccountno,setAccountnomodal] = useState('')
+  const [modalifsc,setIfscmodal] = useState('')
+  
+  const [modalbranch,setBranchmodal] = useState('')
+  const [openbal,setOpenbal] = useState('')
+  const [opentype,setOpentype] = useState('')
+  const [bankdate,setBankDate] = useState('')
+  const [ifscError, setIfscError] = useState('');
+  const [accountNoError, setAccountNoError] = useState('');
+
+  const [banks,setbanks]=useState([])
+  const [selectedBank, setSelectedBank] = useState('');
+  const [accountNumbers, setAccountNumbers] = useState([]);
+
+
+
+
+  useEffect(() => {
+    
+    const getCurrentDate = () => {
+      const date = new Date();
+      const year = date.getFullYear();
+      let month = date.getMonth() + 1;
+      let day = date.getDate();
+
+      
+      if (month < 10) {
+        month = `0${month}`;
+      }
+      if (day < 10) {
+        day = `0${day}`;
+      }
+
+      return `${year}-${month}-${day}`;
+    };
+
+
+
+    
+    setDate(getCurrentDate());
+    setBankDate(getCurrentDate());
+  }, []); 
+
+  const fetchbanks = () => {
+    axios
+      .get(`${config.base_url}/get_banks/${ID}/`)
+      .then((res) => {
+        console.log("banks==", res);
+        if (res.data.status) {
+          
+          setbanks(res.data.bank);
+         
+            
+         
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const fetchAccountNumbers = (bankId) => {
+    axios
+      .get(`${config.base_url}/get_account_numbers/${bankId}/${ID}/`)
+      .then((res) => {
+        console.log("account_numbers==", res);
+        if (res.data.status) {
+          setAccountNumbers(res.data.account_numbers);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    fetchbanks();
+  }, []);
+
+  const handleBankChange = (e) => {
+    const selectedBankId = e.target.value;
+    setSelectedBank(selectedBankId);
+    fetchAccountNumbers(selectedBankId);
+  };
+
+
+
+
+  function handleBankModalSubmit(e) {
+    e.preventDefault();
+    
+    if (modalbank != "" && modalaccountno != "" && modalifsc != "" && modalbranch != "" && openbal !="" && opentype !="") {
+      var u = {
+        Id: ID,
+        bank_name: modalbank,
+        account_number:modalaccountno,
+        ifsc_code : modalifsc,
+        branch_name : modalbranch,
+        opening_balance : openbal,
+        opening_balance_type : opentype,
+        date : bankdate
+      };
+      axios
+        .post(`${config.base_url}/holder_create_new_bank/`, u)
+        .then((res) => {
+          console.log("BANK RES=", res);
+          if (res.data.status) {
+            Toast.fire({
+              icon: "success",
+              title: "bank Created",
+            });
+            //fetchItemUnits();
+            //setUnit(u.name);
+            //setNewUnit("");
+            setBankmodal("");
+            setIfscmodal("");
+            setAccountnomodal("");
+            setBranchmodal("");
+            setOpenbal("");
+            
+          }
+        })
+        .catch((err) => {
+          console.log("ERROR=", err);
+          if (!err.response.data.status) {
+            Swal.fire({
+              icon: "error",
+              title: `${err.response.data.message}`,
+            });
+          }
+        });
+    } else {
+      alert("Invalid");
+    }
+  }
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
+  const validateIfsc = (value) => {
+    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    if (!ifscPattern.test(value)) {
+      setIfscError('Invalid IFSC code. It should be 11 characters long and follow the pattern: 4 letters, 0, 6 alphanumeric characters.');
+    } else {
+      setIfscError('');
+    }
+  };
+
+  const validateAccountNo = (value) => {
+    const accountNoPattern = /^\d{9,18}$/;
+    if (!accountNoPattern.test(value)) {
+      setAccountNoError('Invalid account number. It should be between 9 and 18 digits long.');
+    } else {
+      setAccountNoError('');
+    }
+  };
+
+  const handleIfscChange = (e) => {
+    const value = e.target.value.toUpperCase();
+    setIfscmodal(value);
+    validateIfsc(value);
+  };
+
+  const handleAccountNoChange = (e) => {
+    const value = e.target.value;
+    setAccountnomodal(value);
+    validateAccountNo(value);
+  };
+
+  
   return (
     <>
       <FinBase />
@@ -110,7 +327,8 @@ function Addbankholder() {
                             Choose...
                           </option>
                          
-                          <option value="Bank">Bank Account</option>
+                          <option value="BA">Bank Account</option>
+                          <option value="CC">Credit Card</option>
                           
                         </select>
                       
@@ -127,6 +345,7 @@ function Addbankholder() {
                           name="bankName"
                           className="form-control"
                           id="bankName"
+                          onChange={handleBankChange}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           required
                         >
@@ -134,11 +353,16 @@ function Addbankholder() {
                             Choose...
                           </option>
                          
-                          <option value="Bank1">Bank1</option>
-                          <option value="Bank2">Bank2</option>
+                          {banks &&
+                            banks.map((i) => (
+                              <option value={i.id} className="text-uppercase">
+                                {i.bank_name}
+                              </option>
+                            ))}
                         </select>
                       
-                      <button
+                        <a href="#">
+                          <button
                             type="button"
                             className="btn btn-outline-secondary ml-1"
                             data-toggle="modal"
@@ -150,6 +374,7 @@ function Addbankholder() {
                           >
                             +
                           </button>
+                        </a>
                       </div>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -280,13 +505,12 @@ function Addbankholder() {
                         <label htmlFor="address" style={{ color: "white" }}>
                           Address
                         </label>
-                        <input
-                          type="text"
-                          id="address"
-                          name="address"
-                          className="form-control"
-                          style={{ backgroundColor: "#2a4964", color: "white" }}
-                        />
+                        <textarea
+                        id="address"
+                        name="address"
+                        className="form-control"
+                        style={{ backgroundColor: "#2a4964", color: "white" }}
+                      ></textarea>
                       </div>
                       <div className="col-md-12 mt-3">
                         <label htmlFor="country" style={{ color: "white" }}>
@@ -463,6 +687,7 @@ function Addbankholder() {
                           id="date"
                           name="date"
                           className="form-control"
+                          value={date}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                       </div>
@@ -534,9 +759,150 @@ function Addbankholder() {
                 </div>
               </div>
             </form>
+          </div> 
+        </div>
+      </div>
+
+
+
+
+ {/* <!-- bank Create Modal --> */}
+ <div className="modal fade" id="createNewUnit">
+        <div className="modal-dialog">
+          <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
+            <div className="modal-header">
+              <h5 className="m-3">ADD BANK</h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body w-100">
+              <div className="card p-3">
+                <form
+                  
+                  id="newUnitForm"
+                  className="px-1"
+                >
+                  <div className="row mt-2 w-100">
+                    <div className="col-12">
+                      <label for="name">Bank Name</label>
+                      <input
+                        name="name"
+                        id="unit_name"
+                        value={modalbank}
+                        onChange={(e) => setBankmodal(e.target.value)}
+                        className="form-control  w-100"
+                        required
+                      />
+                    </div>
+                  
+                    <div className="col-12 mt-2">
+                      <label for="name">IFSC Code</label>
+                      <input
+                        name="name"
+                        id="unit_name"
+                        value={modalifsc}
+                        onChange={handleIfscChange}
+                        className="form-control  w-100"
+                        required
+                      />
+                       {ifscError && <div className="text-danger mt-2">{ifscError}</div>}
+                    </div>
+
+
+                    <div className="col-12 mt-2">
+                      <label for="name">Account Number</label>
+                      <input
+                        name="name"
+                        id="unit_name"
+                        value={modalaccountno}
+                        onChange={handleAccountNoChange}
+                        className="form-control  w-100"
+                        required
+                      />
+                      {accountNoError && <div className="text-danger mt-2">{accountNoError}</div>}
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label for="name">Branch Name</label>
+                      <input
+                        name="name"
+                        id="unit_name"
+                        value={modalbranch}
+                        onChange={(e) => setBranchmodal(e.target.value)}
+                        className="form-control  w-100"
+                        required
+                      />
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label for="name">Opening Balnce</label>
+                      <div className="d-flex">
+                      <input
+                        name="name"
+                        id="unit_name"
+                        value={openbal}
+                        onChange={(e) => setOpenbal(e.target.value)}
+                        className="form-control text-uppercase w-100"
+                        required
+                      />
+                      <select
+                          name="alterGstDetails"
+                          className="form-control"
+                          id="alterGstDetails"
+                          
+                          onChange={(e) => setOpentype(e.target.value)}
+                          style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
+                          required
+                        >
+                         
+                          <option value="credit">CREDIT</option>
+                          <option value="debit">DEBIT</option>
+                        </select>
+
+                      </div>
+                    </div>
+                    <div className="col-12 mt-2">
+                      <label for="name">Date</label>
+                      <input type="date"
+                        name="name"
+                        id="unit_name"
+                        value={bankdate}
+                        onChange={(e) => setBankDate(e.target.value)}
+                        className="form-control  w-100"
+                        required
+                      />
+                    </div>
+
+
+
+                  </div>
+                  <div className="row mt-4 w-100">
+                    <div className="col-12 d-flex justify-content-center">
+                      <button
+                        className="btn btn-outline-info text-grey"
+                        data-dismiss="modal"
+                        type="submit"
+                        onClick={handleBankModalSubmit}
+                        id="saveItemUnit"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+
+
+
     </>
   );
 }
