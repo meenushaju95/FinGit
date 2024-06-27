@@ -98,42 +98,7 @@ function Banklist() {
   const ID = Cookies.get('Login_id');
   const [items, setItems] = useState([]);
 
-  const fetchItems = () =>{
-    axios.get(`${config.base_url}/fetch_items/${ID}/`).then((res)=>{
-      console.log("ITMS RES=",res)
-      if(res.data.status){
-        var itms = res.data.items;
-        setItems([])
-        itms.map((i)=>{
-          var obj = {
-            id: i.id,
-            name: i.name,
-            hsn: i.hsn,
-            sac: i.sac,
-            salesRate: i.selling_price,
-            purchaseRate: i.purchase_price,
-            openingStock: i.opening_stock,
-            currentStock: i.current_stock,
-            status: i.status
-          }
-          setItems((prevState)=>[
-            ...prevState, obj
-          ])
-        })
-      }
-    }).catch((err)=>{
-      console.log('ERR',err)
-    })
-  }
-
-  useEffect(()=>{
-    fetchItems();
-  },[])
   
-  function refreshAll(){
-    setItems([])
-    fetchItems();
-  }
   return (
     <>
       <FinBase />
@@ -184,7 +149,7 @@ function Banklist() {
                       >
                         <a
                           className="dropdown-item"
-                          onClick={refreshAll}
+                          
                           style={{
                             height: "40px",
                             fontSize: "15px",

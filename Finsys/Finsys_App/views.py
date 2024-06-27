@@ -4636,7 +4636,7 @@ def Fin_checkEmail(request):
             return Response({'is_exist':True, 'message':f'{eml} already exists, Try another.!'})
         else:
             return Response({'is_exist':False})
-    except Exception as e:
+    except Exception as e: 
         print(e)
         return Response(
             {"status": False, "message": str(e)},
@@ -4754,7 +4754,7 @@ def get_banks(request,id):
         else:
             com = Fin_Staff_Details.objects.get(Login_Id=id).company_id
 
-        bank = Fin_Banking.objects.filter(company=com)
+        bank = Fin_Banking.objects.filter(company=com,bank_status='Active')
         serializer = BankSerializer(bank, many=True)
         return Response(
             {"status": True, "bank": serializer.data}, status=status.HTTP_200_OK
@@ -4767,7 +4767,7 @@ def get_banks(request,id):
         )
     
 @api_view(("GET",))
-def get_account_numbers(request,bid,id):
+def get_bank_details(request,bid,id):
     try:
         data = Fin_Login_Details.objects.get(id=id)
         if data.User_Type == "Company":
@@ -4782,6 +4782,75 @@ def get_account_numbers(request,bid,id):
         )
     except Exception as e:
         print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+
+
+@api_view(("POST",))
+def create_bank_holder(request):
+    try:
+        s_id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=s_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=s_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=s_id).company_id
+
+        request.data["Company"] = com.id
+        request.data["LoginDetails"] = com.Login_Id.id
+        print("hnjdjxnjnnxnxn")
+        createdDate = date.today()
+        
+        
+
+        if Fin_BankHolder.objects.filter(Company = com, Email__iexact = request.data['Email']).exists():
+            return Response({"status": False, "message": "Email already exists"})
+        if Fin_BankHolder.objects.filter(Company = com, phone_number = request.data['phone_number']).exists():
+            return Response({"status": False, "message": "Phone Number already exists"})
+        if Fin_BankHolder.objects.filter(Company = com, Pan_it_number__iexact = request.data['Pan_it_number']).exists():
+            return Response({"status": False, "message": "PAN already exists"})
+        if Fin_BankHolder.objects.filter(Company = com, Gstin_un__iexact = request.data['Gstin_un']).exists():
+            return Response({"status": False, "message": "GST already exists"})
+        else:
+            dt = date.today()
+            request.data['Date'] = dt
+            
+            print('jkjk')
+            bnk = request.data['Bank_name']
+            bnk_name = Fin_Banking.objects.get(id=bnk)
+            request.data['Bank_name'] = bnk_name
+            serializer = BankHolderSerializer(data=request.data)
+            
+            
+            if serializer.is_valid():
+
+                serializer.save()
+                holder = Fin_BankHolder.objects.get(id=serializer.data['id'])
+                print('svaed')
+                
+                
+                bankholder_history = Fin_BankHolderHistory(
+                    login_details = data,
+                    company = com,
+                    Holder = holder,
+                    action = 'Created'
+                )
+                bankholder_history.save()
+                
+                
+                return Response(
+                    {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+                )
+            else:
+                print('bxdjbsdxjb')
+                return Response(
+                    {"status": False, "data": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+    except Exception as e:
         return Response(
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

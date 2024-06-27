@@ -96,6 +96,7 @@ urlpatterns = [
     path('holder_create_new_bank/',holder_createNewBank),
 
     path('get_banks/<int:id>/',get_banks),
-    path('get_account_numbers/<int:bid>/<int:id>/',get_account_numbers)
+    path('get_bank_details/<int:bid>/<int:id>/',get_bank_details),
+    path('create_new_bank_holder/',create_bank_holder)
 
 ]

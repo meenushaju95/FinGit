@@ -446,19 +446,21 @@ class Fin_BankHolder(models.Model):
     Gstin_un = models.CharField(max_length=15, blank=True)
     Set_alter_gst_details = models.BooleanField(default=False)
 
-    Date = models.DateField(default=datetime.date.today)
-    ArithmeticErrormount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=False,null=True)
+    
     Types = [('CREDIT', 'CREDIT'), ('DEBIT', 'DEBIT'),]
     Open_type = models.CharField(max_length=20, choices=Types, default='unknown')
 
     Swift_code = models.CharField(max_length=11,null=True, blank=True)
-    Bank_name = models.CharField(max_length=20, null=True, blank=True)
+    Bank_name = models.CharField(max_length=200, null=True, blank=True)
     Ifsc_code = models.CharField(max_length=15, null=True, blank=True)
     Branch_name = models.CharField(max_length=20, null=True, blank=True)
     Account_number = models.CharField(max_length=20, null=True, blank=True)
+    Amount = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=100,null=True, default='Active')
 
     
-    is_active = models.BooleanField(default=True)
+  
 
     def __str__(self):
         return self.Holder_name

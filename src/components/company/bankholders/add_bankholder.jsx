@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect ,useRef} from "react";
 import FinBase from "../FinBase";
 import { Link,useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -13,17 +13,17 @@ import Swal from "sweetalert2";
 function Addbankholder() {
   const ID = Cookies.get("Login_id");
   const navigate = useNavigate();
-  const [bankDetails , setBankDetails] = useState('')
+  
   const [holder,setHolder] = useState('')
   const [alias,setAlias] = useState('')
   const [phone,setPhone] = useState('')
   const [mail,setMail] = useState('')
   const [accounttypye,setAccounttype] = useState('')
   const [bank,setBank] = useState('')
-  const [accountno,setAccountno] = useState('')
-  const [ifsc,setIfsc] = useState('')
+  //const [accountno,setAccountno] = useState('')
+  //const [ifsc,setIfsc] = useState('')
   const [swift,setSwift] = useState('')
-  const [branch,setBranch] = useState('')
+  //const [branch,setBranch] = useState('')
   const [checkbookrange,setCheckbookrange] = useState('')
   const [checkprint,setCheckprint] = useState('')
   const [checkprintconfig,setCheckprintconfig] = useState('')
@@ -39,6 +39,14 @@ function Addbankholder() {
   const [date,setDate] = useState('')
   const [amount,setAmount] = useState('')
   const [type,setType] = useState('')
+  const [panError,setPanError] = useState('')
+  const [gstError,setGstError] = useState('')
+  const [emailError, setEmailError] = useState('');
+ const [phoneError, setPhoneError] = useState('');
+  const accountNumberRef = useRef(null);
+  const ifscCodeRef = useRef(null);
+  const branchNameRef = useRef(null);
+  const bankref = useRef(null);
   
 
 
@@ -56,7 +64,7 @@ function Addbankholder() {
 
   const [banks,setbanks]=useState([])
   const [selectedBank, setSelectedBank] = useState('');
-  const [accountNumbers, setAccountNumbers] = useState([]);
+  const [bankDetail, setBankDetail] = useState({ accountNumber: '',ifscCode: '',branchName: '',});
 
 
 
@@ -105,13 +113,18 @@ function Addbankholder() {
       });
   };
 
-  const fetchAccountNumbers = (bankId) => {
+  const fetchBankDetails = (bankId) => {
     axios
-      .get(`${config.base_url}/get_account_numbers/${bankId}/${ID}/`)
+      .get(`${config.base_url}/get_bank_details/${bankId}/${ID}/`)
       .then((res) => {
-        console.log("account_numbers==", res);
+        console.log("bank details==", res);
         if (res.data.status) {
-          setAccountNumbers(res.data.account_numbers);
+          const { account_number, ifsc_code, branch_name } = res.data.bank[0];
+          setBankDetail({ 
+            accountNumber: account_number, 
+            ifscCode: ifsc_code, 
+            branchName: branch_name 
+          });
         }
       })
       .catch((err) => {
@@ -125,7 +138,8 @@ function Addbankholder() {
   const handleBankChange = (e) => {
     const selectedBankId = e.target.value;
     setSelectedBank(selectedBankId);
-    fetchAccountNumbers(selectedBankId);
+    fetchBankDetails(selectedBankId);
+    setBank(e.target.value)
   };
 
 
@@ -143,7 +157,9 @@ function Addbankholder() {
         branch_name : modalbranch,
         opening_balance : openbal,
         opening_balance_type : opentype,
-        date : bankdate
+        date : bankdate,
+        bank_status : 'Active'
+        
       };
       axios
         .post(`${config.base_url}/holder_create_new_bank/`, u)
@@ -157,6 +173,8 @@ function Addbankholder() {
             //fetchItemUnits();
             //setUnit(u.name);
             //setNewUnit("");
+            fetchbanks();
+            setSelectedBank()
             setBankmodal("");
             setIfscmodal("");
             setAccountnomodal("");
@@ -209,6 +227,42 @@ function Addbankholder() {
     }
   };
 
+  function validatePan(pan) {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i; 
+    if (!panRegex.test(pan)) {
+      setPanError("Invalid PAN. The PAN should be 10 characters long and follow this pattern: 5 letters (A-Z), 4 digits (0-9), and 1 letter (A-Z). Example: ABCDE1234F.");
+    } else {
+      setPanError('');
+    }
+  }
+  
+  function validateGst(gst) {
+    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i; 
+    if (!gstRegex.test(gst)) {
+      setGstError("Invalid GST. The GST should be 15 characters long and follow this pattern: 2 digits for state code, 10 characters of PAN (5 letters, 4 digits, 1 letter), 1 alphanumeric character (1-9, A-Z), 'Z', and 1 alphanumeric character (0-9, A-Z). Example: 27ABCDE1234F1Z5.");
+    } else {
+      setGstError('');
+    }
+  }
+
+  function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(mail)) {
+      setEmailError("Invalid email. The email should be in the format: example@example.com.");
+    } else {
+      setEmailError('');
+    }
+  }
+  
+  function validatePhone(phone) {
+    const phoneRegex = /^(\+?\d{1,3}[- ]?)?\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      setPhoneError("Invalid phone number. The phone number should be 10 digits long. ");
+    } else {
+      setPhoneError('');
+    }
+  }
+
   const handleIfscChange = (e) => {
     const value = e.target.value.toUpperCase();
     setIfscmodal(value);
@@ -220,6 +274,95 @@ function Addbankholder() {
     setAccountnomodal(value);
     validateAccountNo(value);
   };
+  const handlepanChange = (e) => {
+    const value = e.target.value;
+    setPan(value);
+    validatePan(value);
+  };
+  const handlegstChange = (e) => {
+    const value = e.target.value;
+    setGstno(value);
+    validateGst(value);
+  };
+  const handlePhone= (e) => {
+    const value = e.target.value;
+    setPhone(value);
+    validatePhone(value);
+  };
+  const handleEmail = (e) => {
+    const value = e.target.value;
+    setMail(value);
+    validateEmail(value);
+  };
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+   
+
+    var dt = {
+      Id: ID,
+      Holder_name : holder,
+      Alias : alias,
+      phone_number :phone,
+      Email : mail,
+      Account_type : accounttypye,
+      Set_cheque_book_range : checkbookrange,
+      Enable_cheque_printing : checkprint,
+      Set_cheque_printing_configuration : checkprintconfig,
+      Mailing_name : mailname,
+      Address : address,
+      Country :country,
+      State : state,
+      Pin : pin,
+      Pan_it_number : pan,
+      Registration_type : regtype,
+      Gstin_un : gstno,
+      Set_alter_gst_details : altergst,
+      Date : date,
+      Open_type : type,
+      Swift_code : swift,
+      Bank_name : bank,
+      Ifsc_code : ifscCodeRef.current.value,
+      Branch_name : branchNameRef.current.value,
+      Account_number : accountNumberRef.current.value,
+      Amount : amount,
+      status: "Active",
+
+      
+    };
+    console.log(dt)
+    console.log('bank=',bank,'open_type=',type,'enble check print=',checkprint,date,'acc=',accountNumberRef.current.value,'br=',branchNameRef.current.value,'ifsc=',ifscCodeRef.current.value,'bank=',selectedBank)
+
+    axios
+      .post(`${config.base_url}/create_new_bank_holder/`,dt)
+      .then((res) => {
+        console.log("HOLDER RES=", res);
+        if (res.data.status) {
+          Toast.fire({
+            icon: "success",
+            title: "Bank Holder Created",
+          });
+          navigate("/banklist");
+        }
+        if (!res.data.status && res.data.message != "") {
+          Swal.fire({
+            icon: "error",
+            title: `${res.data.message}`,
+          });
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR=", err);
+        if (!err.response.data.status) {
+          Swal.fire({
+            icon: "error",
+            title: `${err.response.data.message}`,
+          });
+        }
+      });
+  };
+
 
   
   return (
@@ -250,7 +393,8 @@ function Addbankholder() {
 
         <div className="card radius-15">
           <div className="card-body">
-            <form className="needs-validation px-1" validate>
+          
+           
               <div className="row w-100">
                 <div className="col-md-12 mx-0">
                   <div className="row">
@@ -267,6 +411,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          onChange={(e) => setHolder(e.target.value)}
                           required
                         />
                       </div>
@@ -281,6 +426,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          onChange={(e) => setAlias(e.target.value)}
                           required
                         />
                       </div>
@@ -295,8 +441,10 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          onChange={handlePhone}
                           required
                         />
+                        {phoneError && <div className="text-danger mt-2">{phoneError}</div>}
                       </div>
                       <div className="col-md-12 mt-3">
                         <label htmlFor="email" style={{ color: "white" }}>
@@ -309,8 +457,10 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          onChange={handleEmail}
                           required
                         />
+                        {emailError && <div className="text-danger mt-2">{emailError}</div>}
                       </div>
                       <div className="col-md-12 mt-3">
                         <label htmlFor="accountType" style={{ color: "white" }}>
@@ -321,6 +471,7 @@ function Addbankholder() {
                           className="form-control"
                           id="bankName"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setAccounttype(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
@@ -346,6 +497,7 @@ function Addbankholder() {
                           className="form-control"
                           id="bankName"
                           onChange={handleBankChange}
+                          ref={bankref}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           required
                         >
@@ -361,7 +513,7 @@ function Addbankholder() {
                             ))}
                         </select>
                       
-                        <a href="#">
+                       
                           <button
                             type="button"
                             className="btn btn-outline-secondary ml-1"
@@ -374,35 +526,54 @@ function Addbankholder() {
                           >
                             +
                           </button>
-                        </a>
+                       
                       </div>
                       </div>
                       <div className="col-md-12 mt-3">
-                        <label htmlFor="accountNumber" style={{ color: "white" }}>
-                          Account Number
-                        </label>
-                        <input
-                          type="text"
-                          id="accountNumber"
-                          name="accountNumber"
-                          className="form-control"
-                          style={{ backgroundColor: "#2a4964", color: "white" }}
-                          readOnly
-                        />
-                      </div>
-                      <div className="col-md-12 mt-3">
-                        <label htmlFor="ifscCode" style={{ color: "white" }}>
-                          IFSC Code
-                        </label>
-                        <input
-                          type="text"
-                          id="ifscCode"
-                          name="ifscCode"
-                          className="form-control"
-                          style={{ backgroundColor: "#2a4964", color: "white" }}
-                          readOnly
-                        />
-                      </div>
+        <label htmlFor="accountNumber" style={{ color: "white" }}>
+          Account Number
+        </label>
+        <input
+          type="text"
+          id="accountNumber"
+          name="accountNumber"
+          className="form-control"
+          style={{ backgroundColor: "#2a4964", color: "white" }}
+          value={bankDetail.accountNumber}
+          ref={accountNumberRef}
+          readOnly
+        />
+      </div>
+      <div className="col-md-12 mt-3">
+        <label htmlFor="ifscCode" style={{ color: "white" }}>
+          IFSC Code
+        </label>
+        <input
+          type="text"
+          id="ifscCode"
+          name="ifscCode"
+          className="form-control"
+          style={{ backgroundColor: "#2a4964", color: "white" }}
+          value={bankDetail.ifscCode}
+          ref={ifscCodeRef}
+          readOnly
+        />
+      </div>
+      <div className="col-md-12 mt-3">
+        <label htmlFor="branchName" style={{ color: "white" }}>
+          Branch Name
+        </label>
+        <input
+          type="text"
+          id="branchName"
+          name="branchName"
+          className="form-control"
+          style={{ backgroundColor: "#2a4964", color: "white" }}
+          value={bankDetail.branchName}
+          ref={branchNameRef}
+          readOnly
+        />
+      </div>
                       <div className="col-md-12 mt-3">
                         <label htmlFor="swiftCode" style={{ color: "white" }}>
                           SWIFT Code
@@ -412,18 +583,7 @@ function Addbankholder() {
                           id="swiftCode"
                           name="swiftCode"
                           className="form-control"
-                          style={{ backgroundColor: "#2a4964", color: "white" }}
-                        />
-                      </div>
-                      <div className="col-md-12 mt-3">
-                        <label htmlFor="branchName" style={{ color: "white" }}>
-                          Branch Name
-                        </label>
-                        <input
-                          type="text"
-                          id="branchName"
-                          name="branchName"
-                          className="form-control"
+                          onChange={(e) => setSwift(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                       </div>
@@ -441,13 +601,14 @@ function Addbankholder() {
                           className="form-control"
                           id="chequeBookRange"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setCheckbookrange(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
                         </select>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -459,13 +620,14 @@ function Addbankholder() {
                           className="form-control"
                           id="chequePrinting"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setCheckprint(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
                         </select>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -477,13 +639,14 @@ function Addbankholder() {
                           className="form-control"
                           id="chequePrintingConfig"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setCheckprintconfig(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
                         </select>
                       </div>
                     </div>
@@ -499,6 +662,7 @@ function Addbankholder() {
                           name="mailingName"
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setMailname(e.target.value)}
                         />
                       </div>
                       <div className="col-md-12 mt-3">
@@ -510,6 +674,7 @@ function Addbankholder() {
                         name="address"
                         className="form-control"
                         style={{ backgroundColor: "#2a4964", color: "white" }}
+                        onChange={(e) => setaddress(e.target.value)}
                       ></textarea>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -522,6 +687,7 @@ function Addbankholder() {
                           name="country"
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setCountry(e.target.value)}
                         />
                       </div>
                       <div className="col-md-12 mt-3">
@@ -536,6 +702,7 @@ function Addbankholder() {
                           
                           required
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setState(e.target.value)}
                         >
                           <option value="" selected hidden>
                             Choose
@@ -603,6 +770,7 @@ function Addbankholder() {
                           id="pin"
                           name="pin"
                           className="form-control"
+                          onChange={(e) => setPin(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                       </div>
@@ -619,9 +787,11 @@ function Addbankholder() {
                           type="text"
                           id="panNumber"
                           name="panNumber"
-                          className="form-control"
+                          className="form-control text-uppercase"
+                          onChange={handlepanChange}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
+                        {panError && <div className="text-danger mt-2">{panError}</div>}
                       </div>
                       <div className="col-md-12 mt-3">
                         <label htmlFor="registrationType" style={{ color: "white" }}>
@@ -632,6 +802,7 @@ function Addbankholder() {
                           className="form-control"
                           id="registrationType"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          onChange={(e) => setRegtype(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
@@ -643,7 +814,7 @@ function Addbankholder() {
                           <option value="Unregister">Unregister</option>
                         </select>
                       </div>
-                      {(bankDetails.registrationType === 'Regular' || bankDetails.registrationType === 'Composition') && (
+                      {(regtype === 'Regular' || regtype === 'Composition') && (
                         <div className="col-md-12 mt-3">
                           <label htmlFor="gstin" style={{ color: "white" }}>
                             GST IN
@@ -652,11 +823,14 @@ function Addbankholder() {
                             type="text"
                             id="gstin"
                             name="gstin"
-                            className="form-control"
+                            className="form-control text-uppercase"
+                            onChange={handlegstChange}
                             style={{ backgroundColor: "#2a4964", color: "white" }}
                           />
                         </div>
+                         
                       )}
+                      {gstError && <div className="text-danger mt-2">{gstError}</div>}
                       <div className="col-md-12 mt-3">
                         <label htmlFor="alterGstDetails" style={{ color: "white" }}>
                           Set Alter GST Details
@@ -665,14 +839,15 @@ function Addbankholder() {
                           name="alterGstDetails"
                           className="form-control"
                           id="alterGstDetails"
+                          onChange={(e) => setAltergst(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           required
                         >
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
                         </select>
                       </div>
                     </div>
@@ -688,6 +863,7 @@ function Addbankholder() {
                           name="date"
                           className="form-control"
                           value={date}
+                          onChange={(e) => setDate(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                       </div>
@@ -701,6 +877,7 @@ function Addbankholder() {
                           id="amount"
                           name="amount"
                           className="form-control"
+                          onChange={(e) => setAmount(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                         <select
@@ -708,6 +885,7 @@ function Addbankholder() {
                           className="form-control"
                           id="alterGstDetails"
                           style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
+                          onChange={(e) => setType(e.target.value)}
                           required
                         >
                           <option selected disabled value="">
@@ -739,15 +917,16 @@ function Addbankholder() {
                   <div className="row mt-5 mb-5">
                     <div className="col-md-4"></div>
                     <div className="col-md-4 d-flex justify-content-center">
-                      <button
+                    <button
                         className="btn btn-outline-secondary text-light"
-                        type="submit"
+                        type="button"
+                        onClick={handleSubmit}
                         style={{ width: "50%", height: "fit-content" }}
                       >
                         SAVE
                       </button>
                       <Link
-                        to="/items"
+                        to="/banklist"
                         className="btn btn-outline-secondary ml-1 text-light"
                         style={{ width: "fit-content", height: "fit-content" }}
                       >
@@ -758,7 +937,7 @@ function Addbankholder() {
                   </div>
                 </div>
               </div>
-            </form>
+           
           </div> 
         </div>
       </div>
@@ -783,11 +962,7 @@ function Addbankholder() {
             </div>
             <div className="modal-body w-100">
               <div className="card p-3">
-                <form
-                  
-                  id="newUnitForm"
-                  className="px-1"
-                >
+               
                   <div className="row mt-2 w-100">
                     <div className="col-12">
                       <label for="name">Bank Name</label>
@@ -858,7 +1033,7 @@ function Addbankholder() {
                           style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
                           required
                         >
-                         
+                         <option value="">choose</option>
                           <option value="credit">CREDIT</option>
                           <option value="debit">DEBIT</option>
                         </select>
@@ -893,7 +1068,7 @@ function Addbankholder() {
                       </button>
                     </div>
                   </div>
-                </form>
+               
               </div>
             </div>
           </div>
