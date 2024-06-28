@@ -446,7 +446,7 @@ class Fin_BankHolder(models.Model):
     Gstin_un = models.CharField(max_length=15, blank=True)
     Set_alter_gst_details = models.BooleanField(default=False)
 
-    date = models.DateTimeField(auto_now_add=False,null=True)
+    date = models.DateField(auto_now_add=False,null=True)
     
     Types = [('CREDIT', 'CREDIT'), ('DEBIT', 'DEBIT'),]
     Open_type = models.CharField(max_length=20, choices=Types, default='unknown')
@@ -473,7 +473,7 @@ class Fin_BankHolderComment(models.Model):
 
     Holder = models.ForeignKey(Fin_BankHolder, on_delete=models.CASCADE)
     comment_text = models.TextField(max_length=255, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f'Comment #{self.id}'

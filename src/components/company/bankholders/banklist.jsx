@@ -65,22 +65,22 @@ function Banklist() {
     }
   }
 
-  function sortHsnAscending() {
+  function sortBankNameAscending() {
     var table = document.getElementById("itemsTable");
     var rows = Array.from(table.rows).slice(1);
-
+  
     rows.sort(function (a, b) {
-      var hsnA = parseInt(a.cells[2].textContent);
-      var hsnB = parseInt(b.cells[2].textContent);
-      return hsnA - hsnB;
+      var bankNameA = a.cells[2].textContent.trim(); 
+      var bankNameB = b.cells[2].textContent.trim(); 
+      return bankNameA.localeCompare(bankNameB);
     });
-
-    // Remove existing rows from the table
+  
+    
     for (var i = table.rows.length - 1; i > 0; i--) {
       table.deleteRow(i);
     }
-
-    // Append the sorted rows back to the table
+  
+    
     rows.forEach(function (row) {
       table.tBodies[0].appendChild(row);
     });
@@ -96,7 +96,42 @@ function Banklist() {
   }
 
   const ID = Cookies.get('Login_id');
-  const [items, setItems] = useState([]);
+  const [holder, setHolder] = useState([]);
+  
+  const fetchHolder = () =>{
+    axios.get(`${config.base_url}/fetch_bankholder/${ID}/`).then((res)=>{
+      console.log("holder RES=",res)
+      if(res.data.status){
+        var itms = res.data.holder;
+        setHolder([])
+        itms.map((i)=>{
+          var obj = {
+            id: i.id,
+            name: i.Holder_name,
+            bank: i.Bank_name,
+            ifsc: i.Ifsc_code,
+            branch: i.Branch_name,
+            
+            status: i.status
+          }
+          setHolder((prevState)=>[
+            ...prevState, obj
+          ])
+        })
+      }
+    }).catch((err)=>{
+      console.log('ERR',err)
+    })
+  }
+
+  useEffect(()=>{
+    fetchHolder();
+  },[])
+  
+  function refreshAll(){
+    setHolder([])
+    fetchHolder();
+  }
 
   
   return (
@@ -149,7 +184,7 @@ function Banklist() {
                       >
                         <a
                           className="dropdown-item"
-                          
+                          onClick={refreshAll}
                           style={{
                             height: "40px",
                             fontSize: "15px",
@@ -178,7 +213,7 @@ function Banklist() {
                             color: "white",
                             cursor: "pointer",
                           }}
-                          onClick={sortHsnAscending}
+                          onClick={sortBankNameAscending}
                         >
                           Bank Name
                         </a>
@@ -245,7 +280,7 @@ function Banklist() {
                         onClick={()=>filterTable(7,'inactive')}
                       >
                         Inactive
-                      </a>
+                       </a>
                     </div>
                   </div>
                   <Link to="/add_bankholder" className="ml-1">
@@ -278,17 +313,17 @@ function Banklist() {
                 </tr>
               </thead>
               <tbody>
-                {items && items.map((i,index)=>(
+                {holder && holder.map((i,index)=>(
                   <tr
                     className="clickable-row"
-                    onClick={()=>navigate(`/view_item/${i.id}/`)}
+                    onClick={()=>navigate(`/viewholder/${i.id}/`)}
                     style={{ cursor: "pointer" }}
                   >
                     <td>{index+1}</td>
                     <td>{i.name}</td>
-                    <td>{i.hsn ? i.hsn : i.sac}</td>
-                    <td>{i.salesRate}</td>
-                    <td>{i.purchaseRate}</td>
+                    <td>{i.bank}</td>
+                    <td>{i.ifsc}</td>
+                    <td>{i.branch}</td>
                     
                   </tr>
                 ))}

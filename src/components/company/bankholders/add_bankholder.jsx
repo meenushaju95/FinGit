@@ -393,7 +393,11 @@ function Addbankholder() {
 
         <div className="card radius-15">
           <div className="card-body">
-          
+          <form
+              className="needs-validation px-1"
+              onSubmit={handleSubmit}
+              validate
+            >
            
               <div className="row w-100">
                 <div className="col-md-12 mx-0">
@@ -607,8 +611,8 @@ function Addbankholder() {
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
+                          <option value="True">Yes</option>
+                          <option value="False">No</option>
                         </select>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -626,8 +630,8 @@ function Addbankholder() {
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
+                          <option value="True">Yes</option>
+                          <option value="False">No</option>
                         </select>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -645,8 +649,8 @@ function Addbankholder() {
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
+                          <option value="True">Yes</option>
+                          <option value="False">No</option>
                         </select>
                       </div>
                     </div>
@@ -846,8 +850,8 @@ function Addbankholder() {
                           <option selected disabled value="">
                             Choose...
                           </option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
+                          <option value="True">Yes</option>
+                          <option value="False">No</option>
                         </select>
                       </div>
                     </div>
@@ -919,8 +923,8 @@ function Addbankholder() {
                     <div className="col-md-4 d-flex justify-content-center">
                     <button
                         className="btn btn-outline-secondary text-light"
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
+                       
                         style={{ width: "50%", height: "fit-content" }}
                       >
                         SAVE
@@ -937,7 +941,7 @@ function Addbankholder() {
                   </div>
                 </div>
               </div>
-           
+              </form>
           </div> 
         </div>
       </div>
