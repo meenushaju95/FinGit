@@ -468,13 +468,12 @@ class Fin_BankHolder(models.Model):
     
 
 class Fin_BankHolderComment(models.Model):
-    LoginDetails = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    
     Company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
 
     Holder = models.ForeignKey(Fin_BankHolder, on_delete=models.CASCADE)
-    comment_text = models.TextField(max_length=255, null=True, blank=True)
-    created_at = models.DateField(auto_now_add=True)
-
+    comment = models.TextField(max_length=255, null=True, blank=True)
+    
     def __str__(self):
         return f'Comment #{self.id}'
        

@@ -253,7 +253,7 @@ function Banklist() {
                           color: "white",
                           cursor: "pointer",
                         }}
-                        onClick={()=>filterTable(7,'all')}
+                        onClick={()=>filterTable(5,'all')}
                       >
                         All
                       </a>
@@ -265,7 +265,7 @@ function Banklist() {
                           color: "white",
                           cursor: "pointer",
                         }}
-                        onClick={()=>filterTable(7,'active')}
+                        onClick={()=>filterTable(5,'active')}
                       >
                         Active
                       </a>
@@ -277,7 +277,7 @@ function Banklist() {
                           color: "white",
                           cursor: "pointer",
                         }}
-                        onClick={()=>filterTable(7,'inactive')}
+                        onClick={()=>filterTable(5,'inactive')}
                       >
                         Inactive
                        </a>
@@ -309,6 +309,7 @@ function Banklist() {
                   <th>BANK NAME</th>
                   <th>IFSC CODE</th>
                   <th>BRANCH NAME</th>
+                  <th>STATUS</th>
                   
                 </tr>
               </thead>
@@ -324,6 +325,7 @@ function Banklist() {
                     <td>{i.bank}</td>
                     <td>{i.ifsc}</td>
                     <td>{i.branch}</td>
+                    <td>{i.status}</td>
                     
                   </tr>
                 ))}

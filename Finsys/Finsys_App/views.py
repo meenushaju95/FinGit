@@ -4813,76 +4813,83 @@ def create_bank_holder(request):
             return Response({"status": False, "message": "Phone Number already exists"})
         if Fin_BankHolder.objects.filter(Company = com, Pan_it_number__iexact = request.data['Pan_it_number']).exists():
             return Response({"status": False, "message": "PAN already exists"})
-        
-        if request.data['Registration_type'] in ['Regular', 'Composition']:
+       
+        Gstin_un = None
+        if request.data.get('Registration_type') in ['Regular', 'Composition']:
+            gstin_un = request.data.get('Gstin_un')
+            if gstin_un and Fin_BankHolder.objects.filter(Gstin_un__iexact=gstin_un, Company=com).exists():
+                return Response({"status": False, "message": "GST already exists"})
+        else:
+            gstin_un = None
+
             
-                if Fin_BankHolder.objects.filter(Company=com, Gstin_un__iexact=request.data['Gstin_un']).exists():
-                    return Response({"status": False, "message": "GST already exists"})
-                
+        
        
-       
+
                 
            
-        else:
-            dt = datetime.now()
-            request.data['Date'] = dt
-            
-            request.data['Set_cheque_book_range'] = 1 if request.data['Set_cheque_book_range'].lower() == 'true' else 0
-            request.data['Enable_cheque_printing'] = 1 if request.data['Enable_cheque_printing'].lower() == 'true' else 0
-            request.data['Set_cheque_printing_configuration'] = 1 if request.data['Set_cheque_printing_configuration'].lower() == 'true' else 0
-            request.data['Set_alter_gst_details'] = 1 if request.data['Set_alter_gst_details'].lower() == 'true' else 0
+        
+        dt = datetime.now()
+        request.data['Date'] = dt
             
             
-            print('jkjk')
-            bnk = request.data['Bank_name']
-            bnk_name = Fin_Banking.objects.get(id=bnk).bank_name
-            request.data['Bank_name'] = bnk_name
+        request.data['Set_cheque_book_range'] = True if request.data['Set_cheque_book_range'].lower() == 'true' else False
+        request.data['Enable_cheque_printing'] = True if request.data['Enable_cheque_printing'].lower() == 'true' else False
+        request.data['Set_cheque_printing_configuration'] = True if request.data['Set_cheque_printing_configuration'].lower() == 'true' else False
+        request.data['Set_alter_gst_details'] = True if request.data['Set_alter_gst_details'].lower() == 'true' else False
             
-            print(request.data)
             
-            bank_holder = Fin_BankHolder.objects.create(
-            LoginDetails=data,
-            Company=com,
-            Holder_name=request.data['Holder_name'],
-            Alias=request.data['Alias'],
-            phone_number=request.data['phone_number'],
-            Email=request.data['Email'],
-            Account_type=request.data['Account_type'],
-            Set_cheque_book_range=request.data['Set_cheque_book_range'],
-            Enable_cheque_printing=request.data['Enable_cheque_printing'],
-            Set_cheque_printing_configuration=request.data['Set_cheque_printing_configuration'],
-            Mailing_name=request.data['Mailing_name'],
-            Address=request.data['Address'],
-            Country=request.data['Country'],
-            State=request.data['State'],
-            Pin=request.data['Pin'],
-            Pan_it_number=request.data['Pan_it_number'],
-            Registration_type=request.data['Registration_type'],
-            Gstin_un=request.data['Gstin_un'],
-            Set_alter_gst_details=request.data['Set_alter_gst_details'],
-            date=createdDate,
-            Open_type=request.data['Open_type'],
-            Swift_code=request.data['Swift_code'],
-            Bank_name=bnk_name,
-            Ifsc_code=request.data['Ifsc_code'],
-            Branch_name=request.data['Branch_name'],
-            Account_number=request.data['Account_number'],
-            Amount=request.data['Amount'],
-            status=request.data['status']
+            
+        print('jkjk')
+        bnk = request.data['Bank_name']
+        bnk_name = Fin_Banking.objects.get(id=bnk).bank_name
+        request.data['Bank_name'] = bnk_name
+            
+        print(request.data)
+            
+        bank_holder = Fin_BankHolder.objects.create(
+        LoginDetails=data,
+        Company=com,
+        Holder_name=request.data['Holder_name'],
+        Alias=request.data['Alias'],
+        phone_number=request.data['phone_number'],
+        Email=request.data['Email'],
+        Account_type=request.data['Account_type'],
+        Set_cheque_book_range=request.data['Set_cheque_book_range'],
+        Enable_cheque_printing=request.data['Enable_cheque_printing'],
+        Set_cheque_printing_configuration=request.data['Set_cheque_printing_configuration'],
+        Mailing_name=request.data['Mailing_name'],
+        Address=request.data['Address'],
+        Country=request.data['Country'],
+        State=request.data['State'],
+        Pin=request.data['Pin'],
+        Pan_it_number=request.data['Pan_it_number'],
+        Registration_type=request.data['Registration_type'],
+        Gstin_un=request.data['Gstin_un'],
+        Set_alter_gst_details=request.data['Set_alter_gst_details'],
+        date=createdDate,
+        Open_type=request.data['Open_type'],
+        Swift_code=request.data['Swift_code'],
+        Bank_name=bnk_name,
+        Ifsc_code=request.data['Ifsc_code'],
+        Branch_name=request.data['Branch_name'],
+        Account_number=request.data['Account_number'],
+        Amount=request.data['Amount'],
+        status=request.data['status']
         )
 
                 
-            bankholder_history = Fin_BankHolderHistory(
+        bankholder_history = Fin_BankHolderHistory(
                     LoginDetails = data,
                     Company = com,
                     Holder = bank_holder,
                     action = 'Created',
                     date = datetime.now()
                 )
-            bankholder_history.save()
+        bankholder_history.save()
                 
                 
-            return Response({"status": True}, status=status.HTTP_200_OK)
+        return Response({"status": True}, status=status.HTTP_200_OK)
         
     except Exception as e:
         return Response(
@@ -4931,12 +4938,16 @@ def fetch_holder_details(request, id):
                 + " "
                 + hist.LoginDetails.Last_name,
             }
+        cmt = Fin_BankHolderComment.objects.filter(Holder=holder)
+        
+        commentsSerializer = BankHolderCommentSerializer(cmt, many=True)
         
         return Response(
             {
                 "status": True,
                 "item": holderSerializer.data,
-                "history":his
+                "history":his,
+                "comments":commentsSerializer.data
                
             },
             status=status.HTTP_200_OK,
@@ -4949,4 +4960,107 @@ def fetch_holder_details(request, id):
         )
 
 
+@api_view(("POST",))
+def Fin_changeHolderStatus(request):
+    try:
+        print('status')
+        print(request.data['status'])
+        holderId = request.data["id"]
+        data = Fin_BankHolder.objects.get(id=holderId)
+        data.status = request.data["status"]
+        data.save()
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
     
+
+@api_view(("DELETE",))
+def Fin_deleteHolder(request, id):
+    try:
+        hldr = Fin_BankHolder.objects.get(id=id)
+        hldr.delete()
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+@api_view(("GET",))
+def Fin_holderHistory(request, id):
+    try:
+        holder = Fin_BankHolder.objects.get(id=id)
+        hist = Fin_BankHolderHistory.objects.filter(Holder=holder)
+        his = []
+        if hist:
+            for i in hist:
+                h = {
+                    "action": i.action,
+                    "date": i.date,
+                    "name": i.LoginDetails.First_name + " " + i.LoginDetails.Last_name,
+                }
+                his.append(h)
+        holderSerializer = BankHolderSerializer(holder)
+        return Response(
+            {"status": True, "holder": holderSerializer.data, "history": his},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+
+@api_view(("POST",))
+def Fin_addHolderComment(request):
+    try:
+        id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=id).company_id
+
+        request.data["Company"] = com.id
+        serializer = BankHolderCommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"status": True, "data": serializer.data}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"status": False, "data": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+@api_view(("DELETE",))
+def Fin_deleteHolderComment(request, id):
+    try:
+        cmt = Fin_BankHolderComment.objects.get(id=id)
+        cmt.delete()
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+
+
+
+
+

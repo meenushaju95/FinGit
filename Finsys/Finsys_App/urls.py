@@ -99,6 +99,11 @@ urlpatterns = [
     path('get_bank_details/<int:bid>/<int:id>/',get_bank_details),
     path('create_new_bank_holder/',create_bank_holder),
     path('fetch_bankholder/<int:id>/',fetch_bankholder),
-    path('fetch_holder_details/<int:id>/',fetch_holder_details)
+    path('fetch_holder_details/<int:id>/',fetch_holder_details),
+    path('change_holder_status/',Fin_changeHolderStatus),
+    path('delete_holder/<int:id>/',Fin_deleteHolder),
+    path('fetch_holder_history/<int:id>/',Fin_holderHistory),
+    path('add_holder_comment/',Fin_addHolderComment),
+    path('delete_holder_comment/<int:id>/',Fin_deleteHolderComment)
 
 ]

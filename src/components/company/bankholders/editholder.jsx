@@ -1,6 +1,6 @@
 import React, { useState,useEffect ,useRef} from "react";
 import FinBase from "../FinBase";
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useNavigate ,useParams} from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import config from "../../../functions/config";
@@ -10,8 +10,9 @@ import Swal from "sweetalert2";
 
 
 
-function Addbankholder() {
+function Editholder() {
   const ID = Cookies.get("Login_id");
+  const {holderId} = useParams()
   const navigate = useNavigate();
   
   const [holder,setHolder] = useState('')
@@ -65,6 +66,47 @@ function Addbankholder() {
   const [banks,setbanks]=useState([])
   const [selectedBank, setSelectedBank] = useState('');
   const [bankDetail, setBankDetail] = useState({ accountNumber: '',ifscCode: '',branchName: '',});
+
+
+  const [holderDetails, setHolderDetails] = useState({});
+
+  const fetchHolderDetails = () => {
+    axios
+      .get(`${config.base_url}/fetch_holder_details/${holderId}/`)
+      .then((res) => {
+        console.log("HOLDER DATA=", res);
+        if (res.data.status) {
+          var itm = res.data.item;
+          
+          
+          // Set holder details to state
+          setHolderDetails(itm);
+          console.log(holderDetails.status)
+          
+          // Example for setting comments if needed
+        
+          
+          
+          // Additional logic related to your component
+
+          // Example: Calling another function after setting state
+          // stockValue(itm.current_stock, itm.purchase_price);
+        }
+      })
+      .catch((err) => {
+        console.log("ERROR=", err);
+        if (!err.response.data.status) {
+          Swal.fire({
+            icon: "error",
+            title: `${err.response.data.message}`,
+          });
+        }
+      });
+  };
+
+useEffect(() => {
+  fetchHolderDetails();
+}, []);
 
 
 
@@ -384,7 +426,7 @@ function Addbankholder() {
           <div className="row">
             <div className="col-md-12">
               <center>
-                <h2 className="mt-3">ADD BANK HOLDER</h2>
+                <h2 className="mt-3">EDIT BANK HOLDER</h2>
               </center>
               <hr />
             </div>
@@ -415,6 +457,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          value={holderDetails.Holder_name}
                           onChange={(e) => setHolder(e.target.value)}
                           required
                         />
@@ -430,6 +473,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          value={holderDetails.Alias}
                           onChange={(e) => setAlias(e.target.value)}
                           required
                         />
@@ -445,6 +489,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          value={holderDetails.phone_number}
                           onChange={handlePhone}
                           required
                         />
@@ -461,6 +506,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
+                          value={holderDetails.Email}
                           onChange={handleEmail}
                           required
                         />
@@ -476,6 +522,7 @@ function Addbankholder() {
                           id="bankName"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setAccounttype(e.target.value)}
+                          value={holderDetails.Account_type}
                           required
                         >
                           <option selected disabled value="">
@@ -500,6 +547,7 @@ function Addbankholder() {
                           name="bankName"
                           className="form-control"
                           id="bankName"
+                          value={holderDetails.Bank_name}
                           onChange={handleBankChange}
                           ref={bankref}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
@@ -587,6 +635,7 @@ function Addbankholder() {
                           id="swiftCode"
                           name="swiftCode"
                           className="form-control"
+                          value={holderDetails.Swift_code}
                           onChange={(e) => setSwift(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
@@ -605,6 +654,7 @@ function Addbankholder() {
                           className="form-control"
                           id="chequeBookRange"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          value={holderDetails.Set_cheque_book_range}
                           onChange={(e) => setCheckbookrange(e.target.value)}
                           required
                         >
@@ -625,6 +675,7 @@ function Addbankholder() {
                           id="chequePrinting"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setCheckprint(e.target.value)}
+                          value={holderDetails.Enable_cheque_printing}
                           required
                         >
                           <option selected disabled value="">
@@ -644,6 +695,7 @@ function Addbankholder() {
                           id="chequePrintingConfig"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setCheckprintconfig(e.target.value)}
+                          value={holderDetails.Set_cheque_printing_configuration}
                           required
                         >
                           <option selected disabled value="">
@@ -666,6 +718,7 @@ function Addbankholder() {
                           name="mailingName"
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          value={holderDetails.Mailing_name}
                           onChange={(e) => setMailname(e.target.value)}
                         />
                       </div>
@@ -679,6 +732,7 @@ function Addbankholder() {
                         className="form-control"
                         style={{ backgroundColor: "#2a4964", color: "white" }}
                         onChange={(e) => setaddress(e.target.value)}
+                        value={holderDetails.Address}
                       ></textarea>
                       </div>
                       <div className="col-md-12 mt-3">
@@ -692,6 +746,7 @@ function Addbankholder() {
                           className="form-control"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setCountry(e.target.value)}
+                          value={holderDetails.Country}
                         />
                       </div>
                       <div className="col-md-12 mt-3">
@@ -707,6 +762,7 @@ function Addbankholder() {
                           required
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setState(e.target.value)}
+                          value={holderDetails.State}
                         >
                           <option value="" selected hidden>
                             Choose
@@ -775,6 +831,7 @@ function Addbankholder() {
                           name="pin"
                           className="form-control"
                           onChange={(e) => setPin(e.target.value)}
+                          value={holderDetails.Pin}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                       </div>
@@ -793,6 +850,7 @@ function Addbankholder() {
                           name="panNumber"
                           className="form-control text-uppercase"
                           onChange={handlepanChange}
+                          value={holderDetails.Pan_it_number}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                         {panError && <div className="text-danger mt-2">{panError}</div>}
@@ -807,6 +865,7 @@ function Addbankholder() {
                           id="registrationType"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           onChange={(e) => setRegtype(e.target.value)}
+                          value={holderDetails.Registration_type}
                           required
                         >
                           <option selected disabled value="">
@@ -829,6 +888,7 @@ function Addbankholder() {
                             name="gstin"
                             className="form-control text-uppercase"
                             onChange={handlegstChange}
+                            value={holderDetails.Gstin_un}
                             style={{ backgroundColor: "#2a4964", color: "white" }}
                           />
                         </div>
@@ -844,6 +904,7 @@ function Addbankholder() {
                           className="form-control"
                           id="alterGstDetails"
                           onChange={(e) => setAltergst(e.target.value)}
+                          value={holderDetails.Set_alter_gst_details}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           required
                         >
@@ -866,7 +927,7 @@ function Addbankholder() {
                           id="date"
                           name="date"
                           className="form-control"
-                          value={date}
+                          value={holderDetails.date}
                           onChange={(e) => setDate(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
@@ -882,6 +943,7 @@ function Addbankholder() {
                           name="amount"
                           className="form-control"
                           onChange={(e) => setAmount(e.target.value)}
+                          value={holderDetails.Amount}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                         />
                         <select
@@ -890,6 +952,7 @@ function Addbankholder() {
                           id="alterGstDetails"
                           style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
                           onChange={(e) => setType(e.target.value)}
+                          value={holderDetails.Open_type}
                           required
                         >
                           <option selected disabled value="">
@@ -902,12 +965,13 @@ function Addbankholder() {
                       </div>
                     </div>
                   </div>
-                  <div className="form-check mt-3">
+                  <div className="form-check mt-3 ">
                     <input
                       type="checkbox"
-                      className="form-check-input"
+                      className="form-check-input checked"
                       id="agreeTerms"
                       name="agreeTerms"
+                      
                       required
                     />
                     <label
@@ -1086,4 +1150,4 @@ function Addbankholder() {
   );
 }
 
-export default Addbankholder;
+export default Editholder;

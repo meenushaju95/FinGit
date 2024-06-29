@@ -97,3 +97,8 @@ class BankHolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fin_BankHolder
         fields = '__all__'
+
+class BankHolderCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fin_BankHolderComment
+        fields = '__all__'

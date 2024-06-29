@@ -53,6 +53,8 @@ import AddCustomer from './components/company/customers/AddCustomer';
 import Banklist from './components/company/bankholders/banklist';
 import Addbankholder from './components/company/bankholders/add_bankholder';
 import Viewholder from './components/company/bankholders/viewholder';
+import BankHistory from './components/company/bankholders/bankhistory';
+import Editholder from './components/company/bankholders/editholder';
 
 function App() {
   return (
@@ -126,6 +128,9 @@ function App() {
              <Route path="/banklist" element={<Banklist />}></Route>
              <Route path="/add_bankholder" element={<Addbankholder />}></Route>
              <Route path="/viewholder/:holderId/" element={<Viewholder />}></Route>
+             <Route path="/bankhistory/:holderId/" element={<BankHistory />}></Route>
+             <Route path="/editholder/:holderId/" element={<Editholder />}></Route>
+
 
 
 
