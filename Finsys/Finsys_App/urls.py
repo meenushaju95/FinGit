@@ -104,6 +104,7 @@ urlpatterns = [
     path('delete_holder/<int:id>/',Fin_deleteHolder),
     path('fetch_holder_history/<int:id>/',Fin_holderHistory),
     path('add_holder_comment/',Fin_addHolderComment),
-    path('delete_holder_comment/<int:id>/',Fin_deleteHolderComment)
+    path('delete_holder_comment/<int:id>/',Fin_deleteHolderComment),
+    path('edit_bank_holder/',Fin_editHolder)
 
 ]

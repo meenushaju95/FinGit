@@ -382,12 +382,63 @@ class Fin_CNotification(models.Model):
     status = models.CharField(max_length=100,null=True,default='New')   
 
 
+
+# Banking
+class Fin_Banking(models.Model):
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+
+    bank_name = models.CharField(max_length=255,null=True,blank=True) 
+    account_number = models.CharField(max_length=255,null=True,blank=True) 
+    ifsc_code = models.CharField(max_length=255,null=True,blank=True) 
+    branch_name = models.CharField(max_length=255,null=True,blank=True) 
+    opening_balance_type = models.CharField(max_length=255,null=True,blank=True) 
+    opening_balance = models.IntegerField(null=True,default=0)
+    date = models.DateTimeField(auto_now_add=False,null=True)
+    current_balance = models.IntegerField(null=True,default=0)
+    bank_status = models.CharField(max_length=255,null=True,blank=True) 
+   
+class Fin_BankingHistory(models.Model):
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True,null=True)
+    action = models.CharField(max_length=255,null=True,blank=True)
+class Fin_BankTransactions(models.Model): 
+
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
+
+    from_type = models.CharField(max_length=255,null=True,blank=True) 
+    to_type = models.CharField(max_length=255,null=True,blank=True) 
+    amount = models.IntegerField(null=True,default=0)
+    adjustment_date = models.DateTimeField(auto_now_add=False,null=True)
+    description = models.CharField(max_length=255,null=True,blank=True) 
+    transaction_type = models.CharField(max_length=255,null=True,blank=True) 
+    adjustment_type = models.CharField(max_length=255,null=True,blank=True) 
+    current_balance = models.IntegerField(null=True,default=0)
+    bank_to_bank = models.IntegerField(null=True,default=0)
+class Fin_BankTransactionHistory(models.Model): 
+
+    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
+    bank_transaction = models.ForeignKey(Fin_BankTransactions, on_delete=models.CASCADE,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True,null=True)
+    action = models.CharField(max_length=255,null=True,blank=True)
+
+
+
+
+
+
+
 #Bank Holders
 
 class Fin_BankHolder(models.Model):
     LoginDetails = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE, null=True, blank=True)
     Company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE, null=True, blank=True)
-
+    bank = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True)
     Holder_name = models.CharField(max_length=255, null=True, blank=True)
     Alias = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=10, null=True, blank=True)
@@ -490,49 +541,4 @@ class Fin_BankHolderHistory(models.Model):
         ('Edited', 'Edited')
         ]
     action = models.CharField(max_length=20, null=True, blank = True, choices=action_choices)
-
-# Banking
-class Fin_Banking(models.Model):
-    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
-    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
-
-    bank_name = models.CharField(max_length=255,null=True,blank=True) 
-    account_number = models.CharField(max_length=255,null=True,blank=True) 
-    ifsc_code = models.CharField(max_length=255,null=True,blank=True) 
-    branch_name = models.CharField(max_length=255,null=True,blank=True) 
-    opening_balance_type = models.CharField(max_length=255,null=True,blank=True) 
-    opening_balance = models.IntegerField(null=True,default=0)
-    date = models.DateTimeField(auto_now_add=False,null=True)
-    current_balance = models.IntegerField(null=True,default=0)
-    bank_status = models.CharField(max_length=255,null=True,blank=True) 
-   
-class Fin_BankingHistory(models.Model):
-    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
-    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
-    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
-    date = models.DateTimeField(auto_now_add=True,null=True)
-    action = models.CharField(max_length=255,null=True,blank=True)
-class Fin_BankTransactions(models.Model): 
-
-    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
-    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
-    banking = models.ForeignKey(Fin_Banking, on_delete=models.CASCADE,null=True,blank=True)
-
-    from_type = models.CharField(max_length=255,null=True,blank=True) 
-    to_type = models.CharField(max_length=255,null=True,blank=True) 
-    amount = models.IntegerField(null=True,default=0)
-    adjustment_date = models.DateTimeField(auto_now_add=False,null=True)
-    description = models.CharField(max_length=255,null=True,blank=True) 
-    transaction_type = models.CharField(max_length=255,null=True,blank=True) 
-    adjustment_type = models.CharField(max_length=255,null=True,blank=True) 
-    current_balance = models.IntegerField(null=True,default=0)
-    bank_to_bank = models.IntegerField(null=True,default=0)
-class Fin_BankTransactionHistory(models.Model): 
-
-    login_details = models.ForeignKey(Fin_Login_Details, on_delete=models.CASCADE,null=True,blank=True)
-    company = models.ForeignKey(Fin_Company_Details, on_delete=models.CASCADE,null=True,blank=True)
-    bank_transaction = models.ForeignKey(Fin_BankTransactions, on_delete=models.CASCADE,null=True,blank=True)
-    date = models.DateTimeField(auto_now_add=True,null=True)
-    action = models.CharField(max_length=255,null=True,blank=True)
-
 
