@@ -111,6 +111,7 @@ function Banklist() {
             bank: i.Bank_name,
             ifsc: i.Ifsc_code,
             branch: i.Branch_name,
+            accno :i.Account_number,
             
             status: i.status
           }
@@ -289,7 +290,7 @@ function Banklist() {
                       style={{ width: "fit-content", height: "fit-content" }}
                       className="btn btn-outline-secondary text-grey"
                     >
-                      <i className="fa fa-plus font-weight-light"></i> New
+                      <i className="fa fa-plus font-weight-light"></i> Bank Holder
                     </button>
                   </Link>
                 </div>
@@ -307,7 +308,9 @@ function Banklist() {
                   <th>SL.NO.</th>
                   <th>HOLDER NAME</th>
                   <th>BANK NAME</th>
+                  
                   <th>IFSC CODE</th>
+                  <th>ACCOUNT NUMBER.</th>
                   <th>BRANCH NAME</th>
                   <th>STATUS</th>
                   
@@ -323,7 +326,9 @@ function Banklist() {
                     <td>{index+1}</td>
                     <td>{i.name}</td>
                     <td>{i.bank}</td>
+                    
                     <td>{i.ifsc}</td>
+                    <td>{i.accno}</td>
                     <td>{i.branch}</td>
                     <td>{i.status}</td>
                     

@@ -45,6 +45,11 @@ function Editholder() {
   const [emailError, setEmailError] = useState('');
  const [phoneError, setPhoneError] = useState('');
   const bankRef = useRef(null);
+
+  const [altergst1,setAltergst1] = useState('')
+  const [checkbook1,setcheckbook1] = useState('')
+  const [enablegst1,setEnablegst1] = useState('')
+  const [checkconfig1,setCheckconfig1] = useState('')
   
   
 
@@ -67,7 +72,7 @@ function Editholder() {
 
 
   const [holderDetails, setHolderDetails] = useState({});
-
+   console.log(' initial checkprint=',checkprint)
   const fetchHolderDetails = () => {
     axios
       .get(`${config.base_url}/fetch_holder_details/${holderId}/`)
@@ -90,9 +95,10 @@ function Editholder() {
           setIfsc(itm.Ifsc_code)
           setBranch(itm.Branch_name)
           setSwift(itm.Swift_code)
-          setCheckbookrange(itm.Set_cheque_book_range)
-          setCheckprint(itm.Enable_cheque_printing)
-          setCheckprintconfig(itm.Set_cheque_printing_configuration)
+          setCheckbookrange(itm.Set_cheque_book_range === true ? "True" : itm.Set_cheque_book_range === false ? "False" : "");
+          setCheckprint(itm.Enable_cheque_printing === true ? "True" : itm.Enable_cheque_printing === false ? "False" : "");
+          setCheckprintconfig(itm.Set_cheque_printing_configuration === true ? "True" : itm.Set_cheque_printing_configuration=== false ? "False" : "");
+          console.log('checkprint=',itm.Enable_cheque_printing)
           setMailname(itm.Mailing_name)
           setaddress(itm.Address)
           setCountry(itm.Country)
@@ -101,13 +107,14 @@ function Editholder() {
           setPan(itm.Pan_it_number)
           setRegtype(itm.Registration_type)
           setGstno(itm.Gstin_un)
-          setAltergst(itm.Set_alter_gst_details)
+          setAltergst(itm.Set_alter_gst_details === true ? "True" : itm.Set_alter_gst_details === false ? "False" : "");
           setDate(itm.date)
           setAmount(itm.Amount)
           setType(itm.Open_type)
 
 
           console.log(holderDetails.status)
+          console.log('holde det=',holderDetails.Set_alter_gst_details)
           
           // Example for setting comments if needed
         
@@ -230,7 +237,7 @@ console.log('bank name',holderDetails.Bank_name)
   function handleBankModalSubmit(e) {
     e.preventDefault();
     
-    if (modalbank != "" && modalaccountno != "" && modalifsc != "" && modalbranch != "" && openbal !="" && opentype !="") {
+    if (modalbank !== "" && modalaccountno !== "" && modalifsc !== "" && modalbranch !== "" && openbal !=="" && opentype !=="") {
       var u = {
         Id: ID,
         bank_name: modalbank,
@@ -377,10 +384,13 @@ console.log('bank name',holderDetails.Bank_name)
     validateEmail(value);
   };
 
+  console.log('swift=',swift)
+  console.log('altergst=',altergst)
 
+console.log('enable gst=',checkprint)
   const handleSubmit = (e) => {
     e.preventDefault();
-   console.log('name=',holder,'alias=',alias,'bank=',bankRef.current.value,'acc no=',accountno,'gst no=',gstno,'gst type=',regtype,'ifsc=',ifsc,'branch=',branch)
+   console.log('swift=',swift,'alias=',alias,'bank=',bankRef.current.value,'acc no=',accountno,'gst no=',gstno,'gst type=',regtype,'ifsc=',ifsc,'branch=',branch,'alter gst=',altergst)
 
     var dt = {
       Id: ID,
@@ -411,7 +421,7 @@ console.log('bank name',holderDetails.Bank_name)
       Branch_name : branch,
       Account_number : accountno,
       Amount : amount,
-      status: "Active",
+      
 
       
     };
@@ -429,7 +439,7 @@ console.log('bank name',holderDetails.Bank_name)
           });
           navigate(`/viewholder/${holderDetails.id}/`);
         }
-        if (!res.data.status && res.data.message != "") {
+        if (!res.data.status && res.data.message !== "") {
           Swal.fire({
             icon: "error",
             title: `${res.data.message}`,
@@ -698,10 +708,12 @@ console.log('bank name',holderDetails.Bank_name)
                           className="form-control"
                           id="chequeBookRange"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
-                          value={checkbookrange}
+                          
                           onChange={(e) => setCheckbookrange(e.target.value)}
+                          value={checkbookrange}
                           required
                         >
+                        
                           <option selected disabled value="">
                             Choose...
                           </option>
@@ -718,8 +730,12 @@ console.log('bank name',holderDetails.Bank_name)
                           className="form-control"
                           id="chequePrinting"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
-                          onChange={(e) => setCheckprint(e.target.value)}
                           value={checkprint}
+                      onChange={(e) => {
+                        
+                        setCheckprint(e.target.value);
+                      }}
+                                            
                           required
                         >
                           <option selected disabled value="">
@@ -738,8 +754,10 @@ console.log('bank name',holderDetails.Bank_name)
                           className="form-control"
                           id="chequePrintingConfig"
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          
                           onChange={(e) => setCheckprintconfig(e.target.value)}
                           value={checkprintconfig}
+                          
                           required
                         >
                           <option selected disabled value="">
@@ -947,8 +965,9 @@ console.log('bank name',holderDetails.Bank_name)
                           name="alterGstDetails"
                           className="form-control"
                           id="alterGstDetails"
-                          onChange={(e) => setAltergst(e.target.value)}
                           value={altergst}
+                          onChange={(e) => setAltergst(e.target.value)}
+                          
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           required
                         >
@@ -1035,7 +1054,7 @@ console.log('bank name',holderDetails.Bank_name)
                        
                         style={{ width: "50%", height: "fit-content" }}
                       >
-                        SAVE
+                        UPDATE
                       </button>
                       <Link
                         to="/banklist"

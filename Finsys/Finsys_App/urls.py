@@ -92,7 +92,7 @@ urlpatterns = [
     path('check_email/',Fin_checkEmail),
     path('check_customer_name/',Fin_checkCustomerName),
 
-    #add bank
+    #bank holder
     path('holder_create_new_bank/',holder_createNewBank),
 
     path('get_banks/<int:id>/',get_banks),
@@ -105,6 +105,6 @@ urlpatterns = [
     path('fetch_holder_history/<int:id>/',Fin_holderHistory),
     path('add_holder_comment/',Fin_addHolderComment),
     path('delete_holder_comment/<int:id>/',Fin_deleteHolderComment),
-    path('edit_bank_holder/',Fin_editHolder)
+    path('edit_bank_holder/',Fin_editHolder),
 
 ]

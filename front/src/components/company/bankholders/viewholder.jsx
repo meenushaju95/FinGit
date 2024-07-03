@@ -364,19 +364,7 @@ function Viewholder() {
                     >
                       &nbsp;PDF
                     </a>
-                    <a
-                      className="ml-2 btn btn-outline-secondary text-grey fa fa-print"
-                      role="button"
-                      id="printBtn"
-                      style={{
-                        
-                        height: "fit-content",
-                        width: "fit-content",
-                      }}
-                      onClick={() => printSheet()}
-                    >
-                      &nbsp;Print
-                    </a>
+                   
                     <div
                       className="dropdown p-0 nav-item"
                       id="shareBtn"

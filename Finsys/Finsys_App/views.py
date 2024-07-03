@@ -4669,7 +4669,7 @@ def Fin_checkCustomerName(request):
         )
     
 
-#add bank 
+# bank holder
 
 
 @api_view(("POST",))
@@ -4822,12 +4822,7 @@ def create_bank_holder(request):
         else:
             gstin_un = None
 
-            
-        
-       
-
-                
-           
+              
         
         dt = datetime.now()
         request.data['Date'] = dt
@@ -5075,7 +5070,7 @@ def Fin_editHolder(request):
         request.data["Company"] = com.id
         request.data["LoginDetails"] = com.Login_Id.id
 
-        
+        print(request.data['Swift_code'])
         holder_id = request.data.get('holder')
         if Fin_BankHolder.objects.filter(Company=com, Email__iexact=request.data['Email']).exclude(id=holder_id).exists():
             return Response({"status": False, "message": "Email already exists"})
@@ -5088,13 +5083,13 @@ def Fin_editHolder(request):
             gstin_un = request.data.get('Gstin_un')
             if gstin_un and Fin_BankHolder.objects.filter(Gstin_un__iexact=gstin_un, Company=com).exclude(id=holder_id).exists():
                 return Response({"status": False, "message": "GST already exists"})
-
+        print(request.data['Set_cheque_book_range'])
         # Convert string boolean values to Python boolean
-        request.data['Set_cheque_book_range'] = request.data.get('Set_cheque_book_range') == 'True'
-        request.data['Enable_cheque_printing'] = request.data.get('Enable_cheque_printing') == 'True'
-        request.data['Set_cheque_printing_configuration'] = request.data.get('Set_cheque_printing_configuration') == 'True'
-        request.data['Set_alter_gst_details'] = request.data.get('Set_alter_gst_details') == 'True'
-
+        request.data['Set_cheque_book_range'] = True if request.data['Set_cheque_book_range'] == 'True' else False
+        request.data['Enable_cheque_printing'] = True if request.data['Enable_cheque_printing']== 'True' else False
+        request.data['Set_cheque_printing_configuration'] = True if request.data['Set_cheque_printing_configuration'] == 'True' else False
+        request.data['Set_alter_gst_details'] = True if request.data['Set_alter_gst_details'] == 'True' else False
+            
         # Retrieve and update the bank details
         bnk_id = request.data['Bank_name']
         bank_obj = Fin_Banking.objects.get(id=bnk_id)
@@ -5106,6 +5101,7 @@ def Fin_editHolder(request):
         holder.phone_number = request.data['phone_number']
         holder.Email = request.data['Email']
         holder.Account_type = request.data['Account_type']
+        holder.Swift_code = request.data['Swift_code']
         holder.Bank_name = bnk_name 
         holder.bank = bank_obj  
         holder.Account_number = request.data['Account_number']
@@ -5126,7 +5122,7 @@ def Fin_editHolder(request):
         holder.date = request.data['date']
         holder.Amount = request.data['Amount']
         holder.Open_type = request.data['Open_type']
-        holder.status = request.data['status']
+        
         holder.save()
 
         # Create history record for the edit action

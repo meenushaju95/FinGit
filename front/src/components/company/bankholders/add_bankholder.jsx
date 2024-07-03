@@ -431,7 +431,7 @@ function Addbankholder() {
                           style={{ backgroundColor: "#2a4964", color: "white" }}
                           autoComplete="off"
                           onChange={(e) => setAlias(e.target.value)}
-                          required
+                         
                         />
                       </div>
                       <div className="col-md-12 mt-3">
@@ -892,9 +892,7 @@ function Addbankholder() {
                           onChange={(e) => setType(e.target.value)}
                           required
                         >
-                          <option selected disabled value="">
-                            Choose...
-                          </option>
+                          
                           <option value="credit">CREDIT</option>
                           <option value="debit">DEBIT</option>
                         </select>
@@ -1037,7 +1035,7 @@ function Addbankholder() {
                           style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
                           required
                         >
-                         <option value="">choose</option>
+                        
                           <option value="credit">CREDIT</option>
                           <option value="debit">DEBIT</option>
                         </select>
