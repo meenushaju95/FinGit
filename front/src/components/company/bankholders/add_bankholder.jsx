@@ -38,7 +38,7 @@ function Addbankholder() {
   const [altergst,setAltergst] = useState('')
   const [date,setDate] = useState('')
   const [amount,setAmount] = useState('')
-  const [type,setType] = useState('')
+  //const [type,setType] = useState('')
   const [panError,setPanError] = useState('')
   const [gstError,setGstError] = useState('')
   const [emailError, setEmailError] = useState('');
@@ -47,6 +47,7 @@ function Addbankholder() {
   const ifscCodeRef = useRef(null);
   const branchNameRef = useRef(null);
   const bankref = useRef(null);
+  const type = useRef(null)
   
 
 
@@ -320,7 +321,7 @@ function Addbankholder() {
       Gstin_un : gstno,
       Set_alter_gst_details : altergst,
       Date : date,
-      Open_type : type,
+      Open_type : type.current.value,
       Swift_code : swift,
       Bank_name : bank,
       Ifsc_code : ifscCodeRef.current.value,
@@ -589,10 +590,11 @@ function Addbankholder() {
                           className="form-control"
                           onChange={(e) => setSwift(e.target.value)}
                           style={{ backgroundColor: "#2a4964", color: "white" }}
+                          required
                         />
                       </div>
                     </div>
-                  </div>
+                  </div> 
                   <div className="row mt-4">
                     <div className="col-md-6">
                       <h4 className="text-center">Bank Configuration Form</h4>
@@ -889,7 +891,8 @@ function Addbankholder() {
                           className="form-control"
                           id="alterGstDetails"
                           style={{ backgroundColor: "#2a4964", color: "white",width:'150px' }}
-                          onChange={(e) => setType(e.target.value)}
+                          //onChange={(e) => setType(e.target.value)}
+                        ref={type}
                           required
                         >
                           

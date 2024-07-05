@@ -527,7 +527,7 @@ console.log('enable gst=',checkprint)
                           autoComplete="off"
                           value={alias}
                           onChange={(e) => setAlias(e.target.value)}
-                          required
+                         
                         />
                       </div>
                       <div className="col-md-12 mt-3">

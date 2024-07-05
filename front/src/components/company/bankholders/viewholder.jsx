@@ -845,7 +845,7 @@ function Viewholder() {
                         </p>
                       </div>
                     </div>
-
+                    {holderDetails.Alias &&(
                     <div className="row mb-3">
                       <div className="col-4 d-flex justify-content-start">
                         <label style={{ color: "white" }}>Alias</label>
@@ -860,12 +860,13 @@ function Viewholder() {
                             fontSize: "15px",
                             
                           }}
+                      
                         >
                           {holderDetails.Alias}
                         </p>
                       </div>
                     </div>
-                    
+                    )}
 
                     <div className="row mb-3">
                       <div className="col-4 d-flex justify-content-start">
@@ -937,7 +938,8 @@ function Viewholder() {
                       <h4>MAILING ADDRESS </h4>
                     </center>
                     <hr /></div>
-
+                    
+                    {holderDetails.Mailing_name && (
                     <div className="row mb-3">
                       <div className="col-4 d-flex justify-content-start">
                         <label style={{ color: "white" }}>Mailing Name</label>
@@ -956,7 +958,7 @@ function Viewholder() {
                           {holderDetails.Mailing_name}
                         </p>
                       </div>
-                    </div>
+                    </div>)}
 
 
                     <div className="row mb-3">

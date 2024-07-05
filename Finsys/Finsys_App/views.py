@@ -4693,6 +4693,8 @@ def holder_createNewBank(request):
         # Converting the combined string to a datetime object
         dt = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
         request.data['date'] = dt
+        if Fin_Banking.objects.filter(company = com, bank_name__iexact = request.data['bank_name'].lower()).exists():
+            return Response({"status": False, "message": "Bank  already exists"})
 
         if Fin_Banking.objects.filter(company = com, bank_name__iexact = request.data['bank_name'], account_number__iexact = request.data['account_number']).exists():
             return Response({"status": False, "message": "Account Number already exists"})
@@ -4778,6 +4780,7 @@ def get_bank_details(request,bid,id):
 
         bank = Fin_Banking.objects.filter(company=com,id=bid)
         serializer = BankSerializer(bank, many=True)
+        print(serializer.data)
         return Response(
             {"status": True, "bank": serializer.data}, status=status.HTTP_200_OK
         )
@@ -4788,6 +4791,7 @@ def get_bank_details(request,bid,id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     
+
 
 
 @api_view(("POST",))
@@ -4813,6 +4817,8 @@ def create_bank_holder(request):
             return Response({"status": False, "message": "Phone Number already exists"})
         if Fin_BankHolder.objects.filter(Company = com, Pan_it_number__iexact = request.data['Pan_it_number']).exists():
             return Response({"status": False, "message": "PAN already exists"})
+        if Fin_BankHolder.objects.filter(Company = com, bank = request.data['Bank_name']).exists():
+            return Response({"status": False, "message": "Bank already exists"})
        
         Gstin_un = None
         if request.data.get('Registration_type') in ['Regular', 'Composition']:
@@ -5078,6 +5084,9 @@ def Fin_editHolder(request):
             return Response({"status": False, "message": "Phone Number already exists"})
         if Fin_BankHolder.objects.filter(Company=com, Pan_it_number__iexact=request.data['Pan_it_number']).exclude(id=holder_id).exists():
             return Response({"status": False, "message": "PAN already exists"})
+        if Fin_BankHolder.objects.filter(Company = com, bank = request.data['Bank_name']).exclude(id=holder_id).exists():
+            return Response({"status": False, "message": "Bank already exists"})
+       
 
         if request.data.get('Registration_type') in ['Regular', 'Composition']:
             gstin_un = request.data.get('Gstin_un')

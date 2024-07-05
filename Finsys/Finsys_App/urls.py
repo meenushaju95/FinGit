@@ -106,5 +106,6 @@ urlpatterns = [
     path('add_holder_comment/',Fin_addHolderComment),
     path('delete_holder_comment/<int:id>/',Fin_deleteHolderComment),
     path('edit_bank_holder/',Fin_editHolder),
+    
 
 ]
