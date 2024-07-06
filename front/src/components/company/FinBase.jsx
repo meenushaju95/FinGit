@@ -1456,7 +1456,8 @@ function FinBase() {
                   {/* {% endif %} */}
 
                   {/* {% if allmodules.Employees_Loan == 1 %} */}
-                  <li id="employeeloan"><a href="{% url 'employee_loan_list' %}"><i className="bx bx-right-arrow-alt"></i>Employee Loan</a> </li>
+                 
+                  <li id="employeeloan"><Link to="/loanlist"><i className="bx bx-right-arrow-alt"></i>Employee Loan</Link></li>
                   {/* {% endif %} */}
 
                   {/* {% if allmodules.Holiday == 1 %} */}

@@ -56,6 +56,9 @@ import Viewholder from './components/company/bankholders/viewholder';
 import BankHistory from './components/company/bankholders/bankhistory';
 import Editholder from './components/company/bankholders/editholder';
 
+import Loanlist from './components/company/loan/loanlist';
+import Addloan from './components/company/loan/addloan';
+
 function App() {
   return (
   <>
@@ -130,6 +133,11 @@ function App() {
              <Route path="/viewholder/:holderId/" element={<Viewholder />}></Route>
              <Route path="/bankhistory/:holderId/" element={<BankHistory />}></Route>
              <Route path="/editholder/:holderId/" element={<Editholder />}></Route>
+
+             {/* EMPLOYEE LOAN */}
+             <Route path="/loanlist" element={<Loanlist />}></Route>
+             <Route path="/addloan" element={<Addloan />}></Route>
+
 
 
 
